@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  mongo-express:
+    networks:
+      - mongo
+      - traefik-public
+    image: mongo-express
+    environment:
+      - ME_CONFIG_BASICAUTH_USERNAME
+      - ME_CONFIG_BASICAUTH_PASSWORD
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik-public
+        - traefik.constraint-label=traefik-public
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - traefik.http.routers.mongo-express-http.rule=Host(`${DOMAIN?VARNOTSET}`)
+        - traefik.http.routers.mongo-express-http.entrypoints=http
+        - traefik.http.routers.mongo-express-http.middlewares=https-redirect
+        - traefik.http.routers.mongo-express-https.rule=Host(`${DOMAIN?VARNOTSET}`)
+        - traefik.http.routers.mongo-express-https.entrypoints=https
+        - traefik.http.routers.mongo-express-https.tls=true
+        - traefik.http.routers.mongo-express-https.tls.certresolver=le
+        - traefik.http.services.mongo-express.loadbalancer.server.port=8081
+networks:
+  mongo:
+    name: ${MONGO_NETWORK}
+    external: true
+  traefik-public:
+    external: true

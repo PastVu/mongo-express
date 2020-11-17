@@ -1,0 +1,5 @@
+version: '3.8'
+services:
+  mongo-express:
+    environment:
+      - ME_CONFIG_OPTIONS_READONLY=true
